@@ -1,6 +1,8 @@
-import type { Metadata } from "next";
+import React from "react";
+import { Stack } from "@mui/material";
 
 import { fontTheme } from "@/theme/foundations/fonts";
+import Header from "@/components/global/Header";
 import ThemeProvider from "@/theme";
 
 export const metadata = {
@@ -20,7 +22,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={fontTheme.className}>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <Header />
+          <Stack component="main" px={2}>
+            {children}
+          </Stack>
+        </ThemeProvider>
       </body>
     </html>
   );

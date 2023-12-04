@@ -23,7 +23,7 @@ const GlobalStyles = () => {
           padding: 0,
           width: "100%",
           height: "100%",
-          backgroundColor: palette.grey[200],
+          backgroundColor: palette.common.white,
         },
         "#root": {
           width: "100%",

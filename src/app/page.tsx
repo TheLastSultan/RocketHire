@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function Home() {
-  return <main>Welcome to RocketHire first init.</main>;
+  return <React.Fragment>{/* // TO BE IMPLEMENTED! */}</React.Fragment>;
 }
