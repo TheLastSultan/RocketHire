@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Stack } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import { GridApi } from "ag-grid-community";
 
 import AspectRatioIcon from "@mui/icons-material/AspectRatio";
@@ -14,47 +14,62 @@ interface ControlPanelProps {
   onAddColumn: () => void;
 }
 
+interface ControlButtonProps {
+  action: () => void | undefined;
+  icon: React.JSX.Element;
+  text: string;
+}
+
+const ControlButton = ({ action, icon, text }: ControlButtonProps) => (
+  <Grid item xs={6} sm={4} md={3} lg={2} xl={1}>
+    <Button onClick={action} startIcon={icon} size="small">
+      {text}
+    </Button>
+  </Grid>
+);
+
 const ControlPanel: React.FC<ControlPanelProps> = ({
   gridApi,
   onAddRow,
   onAddColumn,
-}) => (
-  <Stack alignItems="center" direction="row" spacing={3} px={2}>
-    <Button
-      onClick={() => gridApi?.sizeColumnsToFit()}
-      startIcon={<AspectRatioIcon />}
-      size="small"
-    >
-      Fit Screen
-    </Button>
-    <Button
-      onClick={() => gridApi?.selectAll()}
-      startIcon={<SelectAllIcon />}
-      size="small"
-    >
-      Select All
-    </Button>
-    <Button
-      onClick={() => gridApi?.deselectAll()}
-      startIcon={<DeselectIcon />}
-      size="small"
-    >
-      Deselect All
-    </Button>
-    <Button
-      onClick={() => gridApi?.exportDataAsCsv()}
-      startIcon={<GetAppIcon />}
-      size="small"
-    >
-      Download CSV
-    </Button>
-    <Button onClick={onAddRow} startIcon={<AddIcon />} size="small">
-      Add Row
-    </Button>
-    <Button onClick={onAddColumn} startIcon={<AddIcon />} size="small">
-      Add Column
-    </Button>
-  </Stack>
-);
+}) => {
+  const buttonData = [
+    {
+      action: () => gridApi?.sizeColumnsToFit(),
+      icon: <AspectRatioIcon />,
+      text: "Fit Screen",
+    },
+    {
+      action: () => gridApi?.selectAll(),
+      icon: <SelectAllIcon />,
+      text: "Select All",
+    },
+    {
+      action: () => gridApi?.deselectAll(),
+      icon: <DeselectIcon />,
+      text: "Deselect All",
+    },
+    {
+      action: () => gridApi?.exportDataAsCsv(),
+      icon: <GetAppIcon />,
+      text: "Get CSV",
+    },
+    { action: onAddRow, icon: <AddIcon />, text: "Add Row" },
+    { action: onAddColumn, icon: <AddIcon />, text: "Add Column" },
+  ];
+
+  return (
+    <Grid container pl={2}>
+      {buttonData.map((btn, index) => (
+        <ControlButton
+          key={index}
+          action={btn.action}
+          icon={btn.icon}
+          text={btn.text}
+        />
+      ))}
+    </Grid>
+  );
+};
 
 export default ControlPanel;

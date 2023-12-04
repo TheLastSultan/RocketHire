@@ -71,6 +71,11 @@ const Spreadsheet: React.FC<SpreadsheetProps> = ({ rowData }) => {
   };
 
   const handleAddColumn = () => {
+    if (!newColumn.name) {
+      setIsDialogOpen(false);
+      return;
+    }
+
     const newColumnDef = {
       field: newColumn.name,
       headerName: newColumn.name,
