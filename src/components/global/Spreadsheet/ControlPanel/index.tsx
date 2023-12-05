@@ -7,11 +7,14 @@ import SelectAllIcon from "@mui/icons-material/SelectAll";
 import DeselectIcon from "@mui/icons-material/Deselect";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 interface ControlPanelProps {
   gridApi: GridApi | null;
   onAddRow: () => void;
   onAddColumn: () => void;
+  onRemoveSelected: () => void;
+  onDeleteColumn: () => void;
 }
 
 interface ControlButtonProps {
@@ -32,6 +35,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   gridApi,
   onAddRow,
   onAddColumn,
+  onRemoveSelected,
+  onDeleteColumn,
 }) => {
   const buttonData = [
     {
@@ -50,12 +55,22 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       text: "Deselect All",
     },
     {
+      action: onRemoveSelected,
+      icon: <DeleteOutlineIcon />,
+      text: "Delete Selected",
+    },
+    {
       action: () => gridApi?.exportDataAsCsv(),
       icon: <GetAppIcon />,
       text: "Get CSV",
     },
     { action: onAddRow, icon: <AddIcon />, text: "Add Row" },
     { action: onAddColumn, icon: <AddIcon />, text: "Add Column" },
+    {
+      action: onDeleteColumn,
+      icon: <DeleteOutlineIcon />,
+      text: "Delete Column",
+    },
   ];
 
   return (
