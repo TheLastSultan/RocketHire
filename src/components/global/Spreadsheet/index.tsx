@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { ColDef, GridApi, GridReadyEvent, SideBarDef } from "ag-grid-community";
 import { Stack } from "@mui/material";
@@ -8,6 +8,7 @@ import { IOlympicData } from "./interfaces";
 import { StyledContainer } from "./styles";
 import ControlPanel from "./ControlPanel";
 import AddColumnDialog from "./AddColumnDialog";
+import DeleteColumnDialog from "./DeleteColumnDialog";
 
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-alpine.min.css";
@@ -37,9 +38,18 @@ const Spreadsheet: React.FC = () => {
     { field: "total", cellDataType: "number" },
   ]);
   const [rowData, setRowData] = useState<IOlympicData[]>();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAddColDialogOpen, setIsAddColDialogOpen] = useState(false);
+  const [isDeleteColDialogOpen, setIsDeleteColDialogOpen] = useState(false);
   const [newColumn, setNewColumn] = useState({ name: "", type: "" });
-  const columnTypes = ["String", "Number", "List"];
+  const gridRef = useRef<AgGridReact>(null);
+  const columnTypes = [
+    "text",
+    "number",
+    "boolean",
+    "date",
+    "dateString",
+    "object",
+  ];
 
   const onGridReady = useCallback(
     (params: GridReadyEvent) => {
@@ -70,30 +80,38 @@ const Spreadsheet: React.FC = () => {
       bronze: 0,
       total: 0,
     };
-    gridApi?.applyTransaction({ add: [newRow] });
+    gridApi?.applyTransaction({ add: [newRow], addIndex: 0 });
   };
 
-  const addColumn = () => {
-    setIsDialogOpen(true);
-  };
-
-  const handleAddColumn = () => {
+  const onAddColumn = () => {
     if (!newColumn.name) {
-      setIsDialogOpen(false);
+      setIsAddColDialogOpen(false);
       return;
     }
 
-    const newColumnDef = {
+    const newColumnDef: ColDef = {
       field: newColumn.name,
       headerName: newColumn.name,
-      sortable: true,
-      filter: true,
-      editable: true,
+      cellDataType: newColumn.type,
     };
     setColumnDefs([...columnDefs, newColumnDef]);
-    setIsDialogOpen(false);
+    setIsAddColDialogOpen(false);
     setNewColumn({ name: "", type: "" });
   };
+
+  const onRemoveSelected = useCallback(() => {
+    const selectedData = gridRef.current!.api.getSelectedRows();
+    gridRef.current!.api.applyTransaction({
+      remove: selectedData,
+    })!;
+  }, []);
+
+  const onDeleteColumn = useCallback((columnName: string) => {
+    setColumnDefs((currentDefs) =>
+      currentDefs.filter((colDef) => colDef.field !== columnName)
+    );
+    setIsDeleteColDialogOpen(false);
+  }, []);
 
   const defaultColDef = useMemo<ColDef>(() => {
     return {
@@ -143,28 +161,41 @@ const Spreadsheet: React.FC = () => {
           <ControlPanel
             gridApi={gridApi}
             onAddRow={addRow}
-            onAddColumn={addColumn}
+            onAddColumn={() => setIsAddColDialogOpen(true)}
+            onDeleteColumn={() => setIsDeleteColDialogOpen(true)}
+            onRemoveSelected={onRemoveSelected}
           />
         )}
 
         <StyledContainer className="ag-theme-alpine">
           <AgGridReact
+            ref={gridRef}
             rowData={rowData}
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
             autoGroupColumnDef={autoGroupColumnDef}
             sideBar={sideBar}
             onGridReady={onGridReady}
+            rowSelection="multiple"
+            pagination={true}
+            paginationPageSizeSelector={[20, 50, 100, 200, 500, 1000]}
           />
         </StyledContainer>
 
         <AddColumnDialog
-          open={isDialogOpen}
-          onClose={() => setIsDialogOpen(false)}
+          open={isAddColDialogOpen}
+          onClose={() => setIsAddColDialogOpen(false)}
           columnTypes={columnTypes}
           newColumn={newColumn}
           setNewColumn={setNewColumn}
-          handleAddColumn={handleAddColumn}
+          onAddColumn={onAddColumn}
+        />
+
+        <DeleteColumnDialog
+          open={isDeleteColDialogOpen}
+          onClose={() => setIsDeleteColDialogOpen(false)}
+          columnDefs={columnDefs}
+          onDelete={onDeleteColumn}
         />
       </Stack>
     </motion.div>

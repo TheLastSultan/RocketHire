@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogTitle,
   MenuItem,
+  Stack,
   TextField,
 } from "@mui/material";
 
@@ -17,7 +18,7 @@ interface AddColumnDialogProps {
   setNewColumn: React.Dispatch<
     React.SetStateAction<{ name: string; type: string }>
   >;
-  handleAddColumn: () => void;
+  onAddColumn: () => void;
 }
 
 const AddColumnDialog: React.FC<AddColumnDialogProps> = ({
@@ -26,38 +27,42 @@ const AddColumnDialog: React.FC<AddColumnDialogProps> = ({
   columnTypes,
   newColumn,
   setNewColumn,
-  handleAddColumn,
+  onAddColumn,
 }) => (
   <Dialog open={open} onClose={onClose}>
     <DialogTitle>Add New Column</DialogTitle>
     <DialogContent>
-      <TextField
-        autoFocus
-        margin="dense"
-        label="Column Name"
-        fullWidth
-        variant="outlined"
-        value={newColumn.name}
-        onChange={(e) => setNewColumn({ ...newColumn, name: e.target.value })}
-      />
-      <TextField
-        select
-        label="Column Type"
-        value={newColumn.type}
-        onChange={(e) => setNewColumn({ ...newColumn, type: e.target.value })}
-        margin="normal"
-        fullWidth
-      >
-        {columnTypes.map((type) => (
-          <MenuItem key={type} value={type}>
-            {type}
-          </MenuItem>
-        ))}
-      </TextField>
+      <Stack spacing={2}>
+        <TextField
+          autoFocus
+          margin="dense"
+          label="Column Name"
+          fullWidth
+          variant="outlined"
+          value={newColumn.name}
+          onChange={(e) => setNewColumn({ ...newColumn, name: e.target.value })}
+          sx={{ width: 270 }}
+        />
+        <TextField
+          select
+          label="Column Type"
+          value={newColumn.type}
+          onChange={(e) => setNewColumn({ ...newColumn, type: e.target.value })}
+          margin="normal"
+          fullWidth
+          sx={{ width: 270 }}
+        >
+          {columnTypes.map((type) => (
+            <MenuItem key={type} value={type}>
+              {type}
+            </MenuItem>
+          ))}
+        </TextField>
+      </Stack>
     </DialogContent>
     <DialogActions>
       <Button onClick={onClose}>Cancel</Button>
-      <Button onClick={handleAddColumn}>Add</Button>
+      <Button onClick={onAddColumn}>Add</Button>
     </DialogActions>
   </Dialog>
 );
