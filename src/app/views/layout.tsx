@@ -10,10 +10,10 @@ export default function ViewsLayout({
 }) {
   return (
     <Grid container>
-      <Grid item xs={12} md={3} xl={2}>
+      <Grid item xs={12} md={3} xl={1.5}>
         <SidePanel />
       </Grid>
-      <Grid item xs={12} md={9} xl={10}>
+      <Grid item xs={12} md={9} xl={10.5}>
         {children}
       </Grid>
     </Grid>
