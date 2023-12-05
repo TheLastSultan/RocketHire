@@ -1,67 +1,74 @@
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
-import { ColDef, GridApi, GridReadyEvent } from "ag-grid-community";
+import { ColDef, GridApi, GridReadyEvent, SideBarDef } from "ag-grid-community";
 import { Stack } from "@mui/material";
 import { motion } from "framer-motion";
 
-import { Developer } from "./interfaces";
+import { IOlympicData } from "./interfaces";
 import { StyledContainer } from "./styles";
 import ControlPanel from "./ControlPanel";
 import AddColumnDialog from "./AddColumnDialog";
+
 import "@ag-grid-community/styles/ag-grid.css";
 import "@ag-grid-community/styles/ag-theme-alpine.min.css";
-
-interface SpreadsheetProps {
-  rowData: Developer[];
-}
+import "ag-grid-enterprise";
 
 const boxVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
-const Spreadsheet: React.FC<SpreadsheetProps> = ({ rowData }) => {
+const Spreadsheet: React.FC = () => {
   const [gridApi, setGridApi] = useState<GridApi | null>(null);
   const [columnDefs, setColumnDefs] = useState<ColDef[]>([
-    { field: "id", sortable: true, filter: true, editable: true },
-    { field: "fullName", sortable: true, filter: true, editable: true },
-    { field: "email", sortable: true, filter: true, editable: true },
-    { field: "phoneNumber", sortable: true, filter: true, editable: true },
-    { field: "expectedSalary", sortable: true, filter: true, editable: true },
-    { field: "reviewed", sortable: true, filter: true, editable: true },
-    { field: "resume", sortable: true, filter: true, editable: true },
-    { field: "skills", sortable: true, filter: true, editable: true },
     {
-      field: "status",
-      sortable: true,
-      filter: true,
-      cellEditor: "agSelectCellEditor",
-      cellEditorParams: {
-        values: ["Hired", "Interviewing", "Applied", "Rejected"],
-      },
-      editable: true,
+      field: "athlete",
+      filter: "agTextColumnFilter",
+      minWidth: 200,
+      cellDataType: "text",
     },
+    { field: "age", cellDataType: "number" },
+    { field: "country", minWidth: 180, cellDataType: "text" },
+    { field: "year", cellDataType: "number" },
+    { field: "date", minWidth: 150, cellDataType: "text" },
+    { field: "gold", cellDataType: "number" },
+    { field: "silver", cellDataType: "number" },
+    { field: "bronze", cellDataType: "number" },
+    { field: "total", cellDataType: "number" },
   ]);
+  const [rowData, setRowData] = useState<IOlympicData[]>();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newColumn, setNewColumn] = useState({ name: "", type: "" });
   const columnTypes = ["String", "Number", "List"];
 
-  const onGridReady = (params: GridReadyEvent) => {
-    setGridApi(params.api);
-  };
+  const onGridReady = useCallback(
+    (params: GridReadyEvent) => {
+      setGridApi(params.api);
+
+      try {
+        gridApi?.showLoadingOverlay();
+        fetch("https://www.ag-grid.com/example-assets/olympic-winners.json")
+          .then((resp) => resp.json())
+          .then((data: IOlympicData[]) => setRowData(data));
+        gridApi?.hideOverlay();
+      } catch (error) {
+        console.log("Error getting view data.");
+      }
+    },
+    [gridApi]
+  );
 
   const addRow = () => {
-    const maxId = rowData.reduce((max, row) => Math.max(max, row.id), 0);
     const newRow = {
-      id: maxId + 1,
-      fullName: "",
-      email: "",
-      phoneNumber: "",
-      expectedSalary: "",
-      reviewed: "",
-      resume: "",
-      skills: "",
-      status: "",
+      athlete: "New Field",
+      age: 0,
+      country: "",
+      year: 0,
+      date: "",
+      gold: 0,
+      silver: 0,
+      bronze: 0,
+      total: 0,
     };
     gridApi?.applyTransaction({ add: [newRow] });
   };
@@ -88,6 +95,47 @@ const Spreadsheet: React.FC<SpreadsheetProps> = ({ rowData }) => {
     setNewColumn({ name: "", type: "" });
   };
 
+  const defaultColDef = useMemo<ColDef>(() => {
+    return {
+      flex: 1,
+      minWidth: 100,
+      enableValue: true,
+      enableRowGroup: true,
+      enablePivot: true,
+      filter: true,
+    };
+  }, []);
+
+  const autoGroupColumnDef = useMemo<ColDef>(() => {
+    return {
+      minWidth: 200,
+    };
+  }, []);
+
+  const sideBar = useMemo<
+    SideBarDef | string | string[] | boolean | null
+  >(() => {
+    return {
+      toolPanels: [
+        {
+          id: "columns",
+          labelDefault: "Columns",
+          labelKey: "columns",
+          iconKey: "columns",
+          toolPanel: "agColumnsToolPanel",
+        },
+        {
+          id: "filters",
+          labelDefault: "Filters",
+          labelKey: "filters",
+          iconKey: "filter",
+          toolPanel: "agFiltersToolPanel",
+        },
+      ],
+      defaultToolPanel: "customStats",
+    };
+  }, []);
+
   return (
     <motion.div initial="hidden" animate="visible" variants={boxVariants}>
       <Stack spacing={2} mt={2}>
@@ -101,11 +149,12 @@ const Spreadsheet: React.FC<SpreadsheetProps> = ({ rowData }) => {
 
         <StyledContainer className="ag-theme-alpine">
           <AgGridReact
-            columnDefs={columnDefs}
             rowData={rowData}
+            columnDefs={columnDefs}
+            defaultColDef={defaultColDef}
+            autoGroupColumnDef={autoGroupColumnDef}
+            sideBar={sideBar}
             onGridReady={onGridReady}
-            animateRows={true}
-            rowSelection="multiple"
           />
         </StyledContainer>
 
