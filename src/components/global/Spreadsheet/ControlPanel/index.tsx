@@ -55,16 +55,16 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       text: "Deselect All",
     },
     {
-      action: onRemoveSelected,
-      icon: <DeleteOutlineIcon />,
-      text: "Delete Selected",
-    },
-    {
       action: () => gridApi?.exportDataAsCsv(),
       icon: <GetAppIcon />,
       text: "Get CSV",
     },
     { action: onAddRow, icon: <AddIcon />, text: "Add Row" },
+    {
+      action: onRemoveSelected,
+      icon: <DeleteOutlineIcon />,
+      text: "Delete Selected",
+    },
     { action: onAddColumn, icon: <AddIcon />, text: "Add Column" },
     {
       action: onDeleteColumn,

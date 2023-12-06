@@ -11,7 +11,7 @@ import AddColumnDialog from "./AddColumnDialog";
 import DeleteColumnDialog from "./DeleteColumnDialog";
 
 import "@ag-grid-community/styles/ag-grid.css";
-import "@ag-grid-community/styles/ag-theme-alpine.min.css";
+import "@ag-grid-community/styles/ag-theme-quartz.min.css";
 import "ag-grid-enterprise";
 
 const boxVariants = {
@@ -121,6 +121,7 @@ const Spreadsheet: React.FC = () => {
       enableRowGroup: true,
       enablePivot: true,
       filter: true,
+      editable: true,
     };
   }, []);
 
@@ -167,7 +168,7 @@ const Spreadsheet: React.FC = () => {
           />
         )}
 
-        <StyledContainer className="ag-theme-alpine">
+        <StyledContainer className="ag-theme-quartz">
           <AgGridReact
             ref={gridRef}
             rowData={rowData}
